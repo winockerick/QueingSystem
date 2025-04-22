@@ -1,0 +1,23 @@
+{
+  "counters": {
+    "counter1": {
+      "token": null,
+      "status": "waiting"
+    },
+    "counter2": {
+      "token": null,
+      "status": "waiting"
+    }
+  },
+  "tokens": {
+    "101": {
+      "status": "waiting",
+      "assigned_counter": "counter1"
+    }
+  },
+  "returned_tokens": {
+    "101": {
+      "status": "returned"
+    }
+  }
+}

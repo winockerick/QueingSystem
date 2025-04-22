@@ -1,0 +1,24 @@
+SMS Token Notification System for Waiting Areas:
+Core Workflow:
+
+Customer gets SMS token
+Sits in waiting area
+System tracks queue progress
+Sends SMS when 3 people away from service
+Optional confirmation/postpone reply
+
+Technical Components:
+
+Central queue tracking database
+SMS gateway
+Automated proximity alert system
+Real-time queue monitoring
+
+Notification Trigger:
+
+When queue reaches specific threshold (3 people)
+Personalized message with estimated time
+Option to confirm/reschedule
+
+Sample SMS:
+"Your token #A32 is next! Please be ready. Estimated wait: 10 mins. Reply 'HOLD' to postpone."
