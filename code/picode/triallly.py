@@ -24,7 +24,7 @@ last_event_time = {}
 DEBOUNCE_DELAY = 0.5  # 500 milliseconds
 
 # Initialize Firebase 
-cred = credentials.Certificate(r"D:\aluta\FYP\QueingSystem\code\.gitignore\beqs-651fc-firebase-adminsdk-fbsvc-d578de6382.json")
+#cred = credentials.Certificate(r"D:\aluta\FYP\QueingSystem\code\.gitignore\beqs-651fc-firebase-adminsdk-fbsvc-d578de6382.json")
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://beqs-651fc-default-rtdb.firebaseio.com/'
 })
