@@ -5,9 +5,9 @@
 #include <LiquidCrystal_I2C.h>
 
 // WiFi and UDP Settings
-const char* ssid = "Library";
-const char* password = "theLibrary";
-const char* udpAddress = "172.16.1.158"; // Raspberry Pi IP
+const char* ssid = "INNO DON";
+const char* password = "Tanzania2023";
+const char* udpAddress = "192.168.100.246"; // Raspberry Pi IP
 const int udpPort = 12345;
 WiFiUDP udp;
 
