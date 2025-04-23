@@ -23,8 +23,8 @@ queue = []  # Global queue to manage tokens
 last_event_time = {}
 DEBOUNCE_DELAY = 0.5  # 500 milliseconds
 
-# Initialize Firebase
-cred = credentials.Certificate(r"D:\aluta\FYP\code\beqs-651fc-firebase-adminsdk-fbsvc-f3a854902a.json")
+# Initialize Firebase 
+cred = credentials.Certificate(r"D:\aluta\FYP\QueingSystem\code\beqs-651fc-firebase-adminsdk-fbsvc-d578de6382.json")
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://beqs-651fc-default-rtdb.firebaseio.com/'
 })
@@ -91,7 +91,9 @@ def reset_counter(counter_id):
 def reset_database():
     counters_ref.set({
         'counter1': {'token': None, 'status': 'waiting'},
-        'counter2': {'token': None, 'status': 'waiting'}
+        'counter2': {'token': None, 'status': 'waiting'},
+        'counter3': {'token': None, 'status': 'waiting'},
+        'counter4': {'token': None, 'status': 'waiting'}
     })
     tokens_ref.set({})
     returned_tokens_ref.set({})
@@ -194,31 +196,63 @@ def udp_listener():
     while True:
         try:
             data, _ = sock.recvfrom(1024)
-            if len(data) >= 15:
-                phone = data[:10].decode().strip()
-                phone = f"+255{phone[-9:]}"
-                token = int(data[10:14].decode())
-                token_type = data[14:].decode().strip()
+            message = data.decode().strip()
 
-                print(f"Received token: Phone={phone}, Token={token}, Type={token_type}")
-                logging.info(f"Received token: Phone={phone}, Token={token}, Type={token_type}")
+            # Check if the message contains valid token data
+            if "," in message:  # Tokenizer sends data in the format: phoneNumber,token,tokenType
+                parts = message.split(",")
+                if len(parts) == 3:
+                    phone = parts[0].strip()
+                    token_str = parts[1].strip()
+                    token_type = parts[2].strip()
 
-                queue.append({"phone": phone, "token": token, "type": token_type})
-                queue.sort(key=lambda x: 0 if x["type"].lower() == "priority" else 1)
+                    # Validate the token is a number
+                    if token_str.isdigit():
+                        token = int(token_str)
+                        print(f"Received token: Phone={phone}, Token={token}, Type={token_type}")
+                        logging.info(f"Received token: Phone={phone}, Token={token}, Type={token_type}")
 
-                send_sms(phone, f"Your token {token} has been received. Please wait for your turn.")
+                        # Add token to the queue with priority
+                        queue.append({"phone": phone, "token": token, "type": token_type})
+                        queue.sort(key=lambda x: 0 if x["type"].lower() == "priority" else 1)
 
-                for i, q in enumerate(queue):
-                    if q["token"] == token and i <= 2:
-                        send_sms(phone, f"ALERT: Token {token} is {i+1} positions away!")
-                        break
+                        # Send SMS to confirm token receipt
+                        send_sms(phone, f"Your token {token} has been received. Please wait for your turn.")
+
+                        # Check if token is three positions away from being served
+                        for i, q in enumerate(queue):
+                            if q["token"] == token and i <= 2:
+                                send_sms(phone, f"ALERT: Token {token} is {i+1} positions away!")
+                                break
+                    else:
+                        print(f"Invalid token format: {token_str}")
+                        logging.warning(f"Invalid token format: {token_str}")
+                else:
+                    print(f"Invalid message format: {message}")
+                    logging.warning(f"Invalid message format: {message}")
             else:
-                print(f"Incomplete data received (length: {len(data)} bytes)")
-                logging.info(f"Incomplete data received (length: {len(data)} bytes)")
+                print(f"Incomplete or unrecognized data received: {message}")
+                logging.info(f"Incomplete or unrecognized data received: {message}")
         except Exception as e:
             print(f"UDP Listener error: {e}")
             logging.error(f"UDP Listener error: {e}")
             continue
+
+# Function to clear a specific counter when counter number + '*' is pressed
+def clear_counter_input(input_string):
+    # Check if the input matches the format (e.g., "1*", "2*", etc.)
+    if input_string.endswith("*") and input_string[:-1].isdigit():
+        counter_id = f"counter{input_string[:-1]}"  # Extract the counter ID
+        if counters_ref.child(counter_id).get() is not None:
+            reset_counter(counter_id)
+            print(f"Counter {counter_id} cleared via input '{input_string}'")
+            logging.info(f"Counter {counter_id} cleared via input '{input_string}'")
+        else:
+            print(f"Invalid counter ID: {counter_id}")
+            logging.warning(f"Invalid counter ID: {counter_id}")
+    else:
+        print(f"Invalid input format: {input_string}")
+        logging.warning(f"Invalid input format: {input_string}")
 
 # GUI Setup
 root = tk.Tk()
